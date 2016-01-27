@@ -1,0 +1,86 @@
+
+/**
+ * Write a description of CaesarCipher here.
+ * 
+ * @author (your name) 
+ * @version (a version number or a date)
+ */
+import edu.duke.*;
+
+public class CaesarCipher {
+    public String encrypt(String input, int key){
+        StringBuilder encrypted = new StringBuilder(input);
+        String alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        String shiftedAlphabet = alphabet.substring(key) + alphabet.substring(0,key);
+        String alphabet2 = "abcdefghijklmnopqrstuvwxyz";
+        String shiftedAlphabet2 = alphabet2.substring(key) + alphabet2.substring(0,key);
+        for(int i = 0; i < encrypted.length(); i++){
+            char currChar = encrypted.charAt(i);
+            int idx = alphabet.indexOf(currChar);
+            int idx2 = alphabet2.indexOf(currChar);
+            if(idx != -1){
+                char newChar = shiftedAlphabet.charAt(idx);
+                encrypted.setCharAt(i, newChar);
+            }
+            else if(idx2 != -1){
+                char newChar2 = shiftedAlphabet2.charAt(idx2);
+                encrypted.setCharAt(i, newChar2);
+            }
+        }
+        return encrypted.toString();
+    }
+    
+    public void testCaesar(){
+        int key = 15;
+        FileResource fr = new FileResource();
+        String message = fr.asString();
+        String encrypted = encrypt(message, key);
+        System.out.println("key is " + key + "\n" + encrypted);
+    }
+    
+    public String encryptTwoKeys(String input, int key1, int key2){
+        StringBuilder encrypted = new StringBuilder(input);
+        String alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        String shiftedAlphabet1 = alphabet.substring(key1) + alphabet.substring(0,key1);
+        String shiftedAlphabet12 = alphabet.substring(key2) + alphabet.substring(0,key2);
+        String alphabet2 = "abcdefghijklmnopqrstuvwxyz";
+        String shiftedAlphabet2 = alphabet2.substring(key1) + alphabet2.substring(0,key1);
+        String shiftedAlphabet22 = alphabet2.substring(key2) + alphabet2.substring(0,key2);
+        for(int i = 0; i < encrypted.length(); i+=2){
+            char currChar = encrypted.charAt(i);
+            int idx = alphabet.indexOf(currChar);
+            int idx2 = alphabet2.indexOf(currChar);
+            if(idx != -1){
+                char newChar = shiftedAlphabet1.charAt(idx);
+                encrypted.setCharAt(i, newChar);
+            }
+            else if(idx2 != -1){
+                char newChar2 = shiftedAlphabet2.charAt(idx2);
+                encrypted.setCharAt(i, newChar2);
+            }
+        }
+        for(int i = 1; i < encrypted.length(); i+=2){
+            char currChar = encrypted.charAt(i);
+            int idx = alphabet.indexOf(currChar);
+            int idx2 = alphabet2.indexOf(currChar);
+            if(idx != -1){
+                char newChar = shiftedAlphabet12.charAt(idx);
+                encrypted.setCharAt(i, newChar);
+            }
+            else if(idx2 != -1){
+                char newChar2 = shiftedAlphabet22.charAt(idx2);
+                encrypted.setCharAt(i, newChar2);
+            }
+        }
+        return encrypted.toString();
+    }
+    
+    public void testencryptTwoKeys(){
+        int key1 = 8;
+        int key2 = 21;
+        FileResource fr = new FileResource();
+        String message = fr.asString();
+        String encrypted = encryptTwoKeys(message, key1, key2);
+        System.out.println("key 1 is " + key1 + "\n" + "key 2 is " + key2 +  "\n" + encrypted);
+    }
+}

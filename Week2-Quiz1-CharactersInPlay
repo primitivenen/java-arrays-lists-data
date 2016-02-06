@@ -1,0 +1,52 @@
+
+/**
+ * Write a description of CharactersInPlay here.
+ * 
+ * @author (your name) 
+ * @version (a version number or a date)
+ */
+import java.util.ArrayList;
+import edu.duke.*;
+
+public class CharactersInPlay {
+    private ArrayList<String> names;
+    private ArrayList<Integer> counts;
+    public CharactersInPlay(){
+        names = new ArrayList<String>(); 
+        counts = new ArrayList<Integer>(); 
+    }
+    public void update(String person){
+        int idx = names.indexOf(person);
+        if(idx == -1){
+            names.add(person);
+            counts.add(1);
+        }
+        else{
+            int value =  counts.get(idx);
+            counts.set(idx,value+1);
+        }
+    }
+    public void findAllCharacters(){
+        FileResource resource = new FileResource();
+        for(String str : resource.lines()){
+            int idx = str.indexOf(".");
+            if(idx != -1){
+                String name = str.substring(0,idx);
+                update(name);
+            }
+        }
+    }
+    public void tester(){
+        findAllCharacters();
+        for(int k=0; k<names.size(); k++){
+            System.out.println(names.get(k) + "\t" +counts.get(k));
+        }
+        charactersWithNumParts(20, 500);
+    }
+    public void charactersWithNumParts(int num1, int num2){
+        for(int k=0; k<names.size(); k++){
+            if(counts.get(k) >= num1 && counts.get(k) <= num2)
+                System.out.println(names.get(k) + "\t" +counts.get(k));
+        }
+    }
+}

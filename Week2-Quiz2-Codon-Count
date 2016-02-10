@@ -1,0 +1,67 @@
+
+/**
+ * Write a description of CodonCount here.
+ * 
+ * @author (your name) 
+ * @version (a version number or a date)
+ */
+import java.util.*;
+import edu.duke.*;
+import java.io.*;
+
+public class CodonCount {
+    private HashMap<String, Integer> map;
+    public CodonCount(){
+        map = new HashMap<String, Integer>();
+    }
+    public void buildCodonMap(int start, String dna){
+        map.clear();
+        for(int k=start; k<dna.length()-3; k=k+3){
+            String codon = dna.substring(k, k+3);
+            if(map.keySet().contains(codon)){
+                map.put(codon, map.get(codon)+1);
+            }
+            else{
+                map.put(codon, 1);
+            }
+        }
+    }
+    public String getMostCommonCodon(){
+        int max = 0;
+        String maxCodon="";
+        for(String codon : map.keySet()){
+            int counts = map.get(codon);
+            if(counts > max){
+                max = counts;
+                maxCodon = codon;
+            }
+        }
+        System.out.println("and most common codon is " + maxCodon + " with count " + max);
+        return maxCodon;
+    }
+    public void printCodonCounts(int start, int end){
+        System.out.println("Counts of codons between " + start + " and " + end +" are:");
+        for(String codon : map.keySet()){
+            int counts = map.get(codon);
+            if(counts >= start && counts <= end){
+                System.out.println(codon+"\t"+counts);
+            }
+        }
+    }
+    public void tester(){
+        FileResource fr = new FileResource();
+        String str = fr.asString().toUpperCase();
+        buildCodonMap(0, str);
+        System.out.println("Reading frame starting with 0 results in " + map.size() +" uniqe codons");
+        getMostCommonCodon();
+        printCodonCounts(1, 5);
+        buildCodonMap(1, str);
+        System.out.println("Reading frame starting with 1 results in " + map.size() +" uniqe codons");
+        getMostCommonCodon();
+        printCodonCounts(1, 5);
+        buildCodonMap(2, str);
+        System.out.println("Reading frame starting with 2 results in " + map.size() +" uniqe codons");
+        getMostCommonCodon();
+        printCodonCounts(1, 5);
+    }
+}

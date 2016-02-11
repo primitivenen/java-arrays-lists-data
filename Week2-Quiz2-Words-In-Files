@@ -1,0 +1,72 @@
+/**
+ * Write a description of WordsInFiles here.
+ * 
+ * @author (your name) 
+ * @version (a version number or a date)
+ */
+import java.io.File;
+import edu.duke.*;
+import java.util.*;
+
+public class WordsInFiles {
+    private HashMap<String, ArrayList<String>> map;
+    public WordsInFiles(){
+        map = new HashMap<String, ArrayList<String>>();
+    }
+    private void addWordsFromFile(File f){
+        FileResource file = new FileResource(f);
+        for(String word : file.words()){
+            if(map.keySet().contains(word)){
+                if(map.get(word).indexOf(f) == -1){
+                    map.get(word).add(f.getName());
+                }
+            }
+            else{
+                ArrayList<String> alword = new ArrayList<String>();
+                map.put(word, alword);
+                alword.add(f.getName());
+            }
+        }
+    }
+    public void buildWordFileMap(){
+        map.clear();
+        DirectoryResource dr = new DirectoryResource();
+        for(File f :dr.selectedFiles()){
+            addWordsFromFile(f);
+        }
+    }
+    public int maxNumber(){
+        int max = 0;
+        for(String word : map.keySet()){
+            int size = map.get(word).size();
+            if(size > max)
+                max = size;
+        }
+        System.out.println("The maximum number of files any word is in: " + max);
+        return max;
+    }
+    public ArrayList wordsInNumFiles(int number){
+        ArrayList<String> names = new ArrayList<String>();
+        for(String word : map.keySet()){
+            int size = map.get(word).size();
+            if(size == number)
+                names.add(word);
+        }
+        return names;
+    }
+    public void printFilesIn(String word){
+        ArrayList<String> names = new ArrayList<String>();
+        names = map.get(word);
+        for(int k=0; k<names.size(); k++){
+            System.out.println(names.get(k));
+        }
+    }
+    public void tester(){
+        buildWordFileMap();
+        int max = maxNumber();
+        ArrayList<String> list = wordsInNumFiles(max);
+        for(int k=0; k<list.size(); k++){
+            System.out.println(list.get(k)+" *Files are: *"+map.get(list.get(k)));
+        }
+    }
+}

@@ -1,0 +1,166 @@
+import java.util.*;
+import edu.duke.*;
+import java.io.*;
+
+public class VigenereBreaker {
+    public String sliceString(String message, int whichSlice, int totalSlices) {
+        //REPLACE WITH YOUR CODE
+        String str = "";
+        for(int k=whichSlice; k<=message.length()-1; k=k+totalSlices){
+            str=str+message.charAt(k);
+        }
+        return str;
+    }
+    public void testsliceString(){
+        System.out.println(sliceString("abcdefghijklm", 0, 3));
+        System.out.println(sliceString("abcdefghijklm", 1, 3));
+        System.out.println(sliceString("abcdefghijklm", 2, 3));
+        System.out.println(sliceString("abcdefghijklm", 0, 4));
+        System.out.println(sliceString("abcdefghijklm", 1, 4));
+        System.out.println(sliceString("abcdefghijklm", 2, 4));
+        System.out.println(sliceString("abcdefghijklm", 3, 4));
+        System.out.println(sliceString("abcdefghijklm", 0, 5));
+        System.out.println(sliceString("abcdefghijklm", 1, 5));
+        System.out.println(sliceString("abcdefghijklm", 2, 5));
+        System.out.println(sliceString("abcdefghijklm", 3, 5));
+        System.out.println(sliceString("abcdefghijklm", 4, 5));
+    }
+        
+    public int[] tryKeyLength(String encrypted, int klength, char mostCommon) {
+        int[] key = new int[klength];
+        //WRITE YOUR CODE HERE
+        CaesarCracker cc = new CaesarCracker(mostCommon);
+        for(int k=0; k<klength; k++){
+            key[k]=cc.getKey(sliceString(encrypted, k, klength));
+        }
+        return key;
+    }
+    public void testtryKeyLength(){
+        FileResource file= new FileResource();
+        String msg = file.asString();
+        int[] a = tryKeyLength(msg,4,'e');
+        for(int i=0; i<a.length; i++){
+            System.out.print(a[i]+",");
+        }
+    }
+/*    public void breakVigenere () {
+        //WRITE YOUR CODE HERE
+        FileResource fr = new FileResource();
+        String msg = fr.asString();        
+        VigenereCipher vc = new VigenereCipher(tryKeyLength(msg, 4 ,'e'));
+        System.out.println(vc.decrypt(msg));
+    }
+    */
+    public HashSet<String> readDictionary(FileResource fr){
+        HashSet<String> hs = new HashSet<String>();
+        for(String line:fr.lines()){
+            String line2=line.toLowerCase();
+            if(!hs.contains(line2))
+                hs.add(line2);
+        }
+        return hs;
+    }
+    public int countWords(String message, HashSet<String> dictionary){
+        int num=0;
+        for(String word:message.split("\\W+")){
+            word = word.toLowerCase();
+            if(dictionary.contains(word)){
+                num++;
+            }
+        }
+        return num;
+    }
+    public String breakForLanguage(String encrypted, HashSet<String> dictionary){
+        int[] num = new int[100];
+        int max=1;
+        int keylength=1;
+        int[] keyMostValidWords = {};
+        String decryption="";
+        for(int k=1; k<=100; k++){ 
+            char mostCommonChar = mostCommonCharIn(dictionary);
+            int[] key=tryKeyLength(encrypted, k, mostCommonChar);
+            VigenereCipher vc = new VigenereCipher(key);
+            String decrypted = vc.decrypt(encrypted);
+            num[k-1]=countWords(decrypted,dictionary);
+            if(num[k-1]>=max){
+                max=num[k-1];
+                decryption=decrypted;
+                keylength=k;
+                keyMostValidWords = key;
+            }
+        }
+        System.out.println("The length of key is "+keylength+", the number of valid words is "+max);
+        /*VigenereCipher vc = new VigenereCipher(tryKeyLength(encrypted, 38 ,'e'));
+        String decrypted = vc.decrypt(encrypted);
+        System.out.println("The number of valid words is "+countWords(decrypted, dictionary));*/
+        return decryption;
+    }
+
+    public void breakVigenere () {
+    /*    //WRITE YOUR CODE HERE
+        FileResource fr = new FileResource();
+        String msg = fr.asString();    
+        FileResource fr_dic = new FileResource();
+        breakForLanguage(msg, readDictionary(fr_dic));
+        //String decryption=breakForLanguage(msg, readDictionary(fr_dic));        
+        //System.out.println(decryption);
+    */
+        DirectoryResource dr = new DirectoryResource();            
+        HashMap<String, HashSet<String>> list = new HashMap<String, HashSet<String>>();
+        
+        for(File f:dr.selectedFiles()){
+            String word = f.getName();
+            FileResource f2 = new FileResource(f);
+            if(!list.containsKey(word)){
+                list.put(word, readDictionary(f2));
+                System.out.println("The dictionary for "+word+" has been read!");
+            }
+        }
+        FileResource fr = new FileResource();
+        breakForAllLanguages(fr.asString(), list);
+    }
+    
+    public char mostCommonCharIn(HashSet<String> dictionary){
+        String alph = "abcdefghijklmnopqrstuvwxyz";
+        int[] counts = new int[26];
+        for(String word:dictionary){
+            word=word.toLowerCase();
+            for(int k=0; k<=word.length()-1; k++){
+                char ch=word.charAt(k);
+                int dex=alph.indexOf(ch);
+                if(dex !=-1){
+                    counts[dex]++;
+                }
+            }
+        }
+        int max=0;
+        char maxChar='a';
+        for(int j=0; j<26; j++){
+           if(counts[j]>max){
+              max=counts[j];
+              maxChar=alph.charAt(j);
+            }
+        }
+        return maxChar;
+    }
+    public void breakForAllLanguages(String encrypted, HashMap<String, HashSet<String>> languages){
+/*        for(String name:languages.keySet()){
+           System.out.println("break using "+name);
+           breakForLanguage(encrypted, languages.get(name));
+        } */
+
+        int max=0;
+        String lang="";
+        for(String name:languages.keySet()){
+            System.out.println("For language "+name);
+            String decrypted = breakForLanguage(encrypted, languages.get(name));
+            int num = countWords(decrypted, languages.get(name));
+            if(num > max){
+                lang = name;
+                max = num;
+            }
+        }
+        System.out.println("The language used is "+lang+",max number of words is "+max);
+        System.out.println(breakForLanguage(encrypted, languages.get(lang)));
+    }
+}
